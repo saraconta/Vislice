@@ -2,9 +2,8 @@
 
 ##Avtorji
 
-*Anja Petković
-*Matija Pretnar
-*Sara Conta
+* Anja Petković
+* Sara Conta
 
 ##Opis 
 
