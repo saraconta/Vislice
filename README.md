@@ -4,6 +4,7 @@
 
 *Anja Petković
 *Matija Pretnar
+*Lojze Slak
 *Sara Conta
 
 ##Opis 
