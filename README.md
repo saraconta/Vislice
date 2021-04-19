@@ -1,12 +1,10 @@
 # Vislice
 
-##Avtorji
+## Avtorji
 
-*Anja Petković
-*Matija Pretnar
-*Lojze Slak
-*Sara Conta
+* Anja Petković
+* Sara Conta
 
-##Opis 
+## Opis 
 
 V tem projektu se lahko igramo igro vislice. To storimo tako, da poženemo funkcijo 'pozeni_vmesnik' znotraj 'tekstovni_vmesnik.py'.
