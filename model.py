@@ -33,7 +33,7 @@ class Igra:
 #Metodi napacne_crke in pravilne_crke, ki vrneta seznam pravilnih oz. napačnih ugibanj igralca.
 #====
 
-    def napacne_crke(crke):
+    def napacne_crke(self):
        return [crka for crka in self.crke if crka not in self.geslo]
     
     def pravilne_crke(self):
@@ -111,6 +111,7 @@ with open('besede.txt', 'r', encoding='utf-8') as f:
 
 #====
 #Napišite funkcijo nova_igra, ki zgradi in vrne novo igro, ki ima za geslo naključno izbrano besedo iz seznama bazen_besed.
+#====
 
 import random
 
@@ -122,3 +123,53 @@ def nova_igra():
 #testno_geslo = "DEŽUJE"
 #testne_crke = ['A', 'E', 'I', 'O', 'U', 'D', 'J', 'K']
 #igra = Igra(testno_geslo, testne_crke)
+
+#Spletni vmesnik za vislice
+#Priprava modela
+#Da bo naš strežnik lahko hkrati uporabljalo več igralcev, bomo naš model razširili s krovnim razredom Vislice, ki bo vseboval podatke o vseh igrah ter njihovem trenutnem stanju (rezultatu metode ugibaj). Igre bomo predstavili s slovarjem, katerega ključi bodo IDji iger, vrednosti pa pari, v katerih bo prva komponenta objekt razreda Igra, druga komponenta pa njeno zadnje stanje (PONOVLJENA_CRKA, PRAVILNA_CRKA, ZMAGA, …).
+
+#V datoteki model.py definirajte konstanto ZACETEK, ki se razlikuje od prej definiranih konstant.
+#====
+
+ZACETEK = 'Z'
+
+#====
+#V datoteki model.py napišite nov razred Vislice, ki vsebuje:
+#====
+
+class vislice:
+
+#====
+#Metodo __init__, ki nastavi vrednost atributa igre na prazen slovar.
+#====
+
+    def __init__(self):
+        self.igre = {}
+
+#====
+#Metodo prost_id_igre, ki vrne ID, ki še ni uporabljen v atributu igre.
+#====
+
+    def prost_id_igre(self):
+        if len(self.igre) == 0:
+            return 0
+        else:
+            return max(self.igre.keys()) + 1
+
+#====
+#Metodo nova_igra, ki s pomočjo funkcije nova_igra s prejšnjih vaj sestavi novo igro z naključnim geslom. Par igre ter njenega začetnega stanja ZACETEK naj v slovar shrani pod še ne zasedenim ključem, ki naj ga metoda tudi vrne.
+#====
+    def nova_igra(self):
+        id_igre = self.prost_id_igre()
+        igra = nova_igra()
+        self.igre[id_igre] = (igra, ZACETEK)
+        return id_igre
+
+#====
+#Metodo ugibaj, ki sprejme id_igre in črko ter na ustrezni igri požene metodo ugibaj (iz razreda Igra) in nato igro ter vrnjeno stanje zapiše nazaj v slovar.
+#====
+
+    def ugibaj(self, id_igre, crka):
+        igra, _ = self.igre[id_igre]
+        stanje = igra.ugibaj(crka)
+        self.igre[id_igre] = (igra, stanje)
