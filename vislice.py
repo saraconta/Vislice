@@ -12,11 +12,13 @@ import bottle
 
 import model
 
+SKRIVNOST = 'moja_skrivnost'
+
 #====
 #Definirate spremenljivko vislice, ki naredi objekt razreda Vislice.
 #====
 
-vislice = model.vislice()
+vislice = model.vislice(model.DATOTEKA_S_STANJEM, model.DATOTEKA_Z_BESEDAMI)
 
 #====
 #Z dekoratorjem bottle.get na naslov "/" pošljete predlogo index.tpl.
@@ -51,29 +53,32 @@ def serve_picture(picture):
 #-Funkcijo nova_igra, ki ob zahtevi strani /igra/ prek metode GET sestavi novo igro, pridobi njen ID id_igre in naredi preusmeritev na naslov /igra/.../ (kjer ... zamenjamo z ustreznim IDjem nove igre)
 #====
 
-@bottle.post('/igra/')
+@bottle.post('/nova-igra/')
 def nova_igra():
     id_igre = vislice.nova_igra()
-    bottle.redirect('/igra/{}/'.format(id_igre))
+    bottle.response.set_cookie('idigre', 'idigre{}'.format(id_igre), path='/', secret=SKRIVNOST)
+    bottle.redirect('/igra/')
  
 #====
 #-Funkcijo pokazi_igro, ki ob zahtevi strani /igra/<id_igre:int>/ prek metode GET naloži igro z IDjem id_igre in njeno trenutno stanje ter oboje prikaže s predlogo igra.tpl.
 #====
 
-@bottle.get('/igra/<id_igre:int>/')
-def pokazi_igro(id_igre):
+@bottle.get('/igra/')
+def pokazi_igro():
+    id_igre = int(bottle.request.get_cookie('idigre', secret=SKRIVNOST).split('e')[1])
     igra, stanje = vislice.igre[id_igre]
-    return bottle.template('igra.tpl', igra=igra, id_igre=id_igre, stanje=stanje)
+    return bottle.template('igra.tpl', igra=igra, stanje=stanje)
 
 #====
 #-Funkcijo ugibaj, ki ob zahtevi strani /igra/<id_igre:int>/ prek metode POST najprej naloži igro z danim IDjem, pridobi trenutno črko iz obrazca s poljem crka, nato naredi ugib s podano črko in naredi preusmeritev nazaj na isti naslov (tokrat prek metode GET).
 #====
 
-@bottle.post('/igra/<id_igre:int>/')
-def ugibaj(id_igre):
+@bottle.post('/igra/')
+def ugibaj():
+    id_igre = int(bottle.request.get_cookie('idigre', secret=SKRIVNOST).split('e')[1])
     crka = bottle.request.forms.getunicode('crka')
     vislice.ugibaj(id_igre, crka)
-    bottle.redirect('/igra/{}/'.format(id_igre))
+    bottle.redirect('/igra/')
 
 #====
 #Z uporabo % if, % elif in % else sintakse v predlogi igra.tpl prikažete ali je igralec zmagal oz. izgubil in mu ponudite gumb za začetek nove igre, sicer pa vnosno polje (z imenom crka) in gumb, s katerim igralec ugiba novo črko.

@@ -7,13 +7,17 @@
 #PRAVILNA_CRKA, PONOVLJENA_CRKA, NAPACNA_CRKA nastavljene na tri različne konstante, npr. '+', 'o', '-'.
 #ZMAGA, PORAZ nastavljeni na dve različni konstanti, npr. 'W' in 'X'.
 #====
+import json
 
 STEVILO_DOVOLJENIH_NAPAK = 10
 PRAVILNA_CRKA = '+'
 PONOVLJENA_CRKA = 'o'
 NAPACNA_CRKA = '-'
 ZMAGA = 'W'
-PORAZ = 'Z'
+PORAZ = 'P'
+
+DATOTEKA_S_STANJEM = 'stanje.json'
+DATOTEKA_Z_BESEDAMI = 'besede.txt'
 
 #====
 #Napišite nov razred Igra, ki vsebuje:
@@ -86,7 +90,7 @@ class Igra:
 #Metodo ugibaj, ki sprejme črko, jo pretvori v veliko črko, in vrne primernega od PRAVILNA_CRKA, PONOVLJENA_CRKA, NAPACNA_CRKA, ZMAGA, PORAZ.
 #====
 
-    def ugibaj(crka):
+    def ugibaj(self, crka):
         crka = crka.upper()
         if crka in self.crke:
             return PONOVLJENA_CRKA
@@ -106,7 +110,7 @@ class Igra:
 #V datoteki napišite kodo, ki iz datoteke besede.txt izlušči nabor besed in ga shrani v seznam bazen_besed.
 #====
 
-with open('besede.txt', 'r', encoding='utf-8') as f:
+with open(DATOTEKA_Z_BESEDAMI, 'r', encoding='utf-8') as f:
     bazen_besed = [beseda.strip().upper() for beseda in f.readlines()]
 
 #====
@@ -143,8 +147,10 @@ class vislice:
 #Metodo __init__, ki nastavi vrednost atributa igre na prazen slovar.
 #====
 
-    def __init__(self):
+    def __init__(self, datoteka_s_stanjem, datoteka_z_besedami):
         self.igre = {}
+        self.datoteka_s_stanjem = datoteka_s_stanjem
+        self.datoteka_z_besedami = datoteka_z_besedami
 
 #====
 #Metodo prost_id_igre, ki vrne ID, ki še ni uporabljen v atributu igre.
@@ -159,10 +165,13 @@ class vislice:
 #====
 #Metodo nova_igra, ki s pomočjo funkcije nova_igra s prejšnjih vaj sestavi novo igro z naključnim geslom. Par igre ter njenega začetnega stanja ZACETEK naj v slovar shrani pod še ne zasedenim ključem, ki naj ga metoda tudi vrne.
 #====
+
     def nova_igra(self):
+        self.nalozi_igre_iz_datoteke()
         id_igre = self.prost_id_igre()
         igra = nova_igra()
         self.igre[id_igre] = (igra, ZACETEK)
+        self.zapisi_igre_v_datoteko()
         return id_igre
 
 #====
@@ -170,6 +179,19 @@ class vislice:
 #====
 
     def ugibaj(self, id_igre, crka):
+        self.nalozi_igre_iz_datoteke()
         igra, _ = self.igre[id_igre]
         stanje = igra.ugibaj(crka)
         self.igre[id_igre] = (igra, stanje)
+        self.zapisi_igre_v_datoteko()
+
+
+    def nalozi_igre_iz_datoteke(self):
+        with open(self.datoteka_s_stanjem, encoding='utf-8') as f:
+            igre = json.load(f)
+            self.igre = {int(id_igre): (Igra(geslo, crke), stanje) for id_igre, (geslo, crke, stanje) in igre.items()}
+
+    def zapisi_igre_v_datoteko(self):
+        with open(self.datoteka_s_stanjem, 'w', encoding='utf-8') as f:
+            igre = {id_igre: (igra.geslo, igra.crke, stanje) for id_igre, (igra, stanje) in self.igre.items()}
+            json.dump(igre, f)
